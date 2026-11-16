@@ -17,6 +17,11 @@ const appProfiles = {
     appName: "BaRbaR Admin",
     startPath: "/admin",
   },
+  backend: {
+    appId: "com.barbar.bookingbazaar.backend",
+    appName: "BaRbaR Backend",
+    startPath: "/admin",
+  },
 } as const;
 
 const profile = appProfiles[role as keyof typeof appProfiles] ?? appProfiles.customer;
