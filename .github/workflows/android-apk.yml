@@ -1,4 +1,4 @@
-name: Build BaRbaR Android APK
+name: Build BaRbaR Role APKs
 
 on:
   workflow_dispatch:
@@ -15,8 +15,23 @@ permissions:
 
 jobs:
   build-android:
-    name: Build debug APK
+    name: Build ${{ matrix.label }} APK
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - role: customer
+            label: Customer
+            artifact: BaRbaR-Customer-APK
+          - role: salon
+            label: Salon
+            artifact: BaRbaR-Salon-APK
+          - role: admin
+            label: Admin
+            artifact: BaRbaR-Admin-APK
+    env:
+      BARBAR_APP_ROLE: ${{ matrix.role }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -71,7 +86,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: BaRbaR-Android-debug-APK
+          name: ${{ matrix.artifact }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
