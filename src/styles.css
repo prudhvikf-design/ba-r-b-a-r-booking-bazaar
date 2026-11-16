@@ -49,6 +49,9 @@
   --color-paper: var(--paper);
   --color-paper-foreground: var(--paper-foreground);
   --color-paper-muted: var(--paper-muted);
+  --color-google: var(--google);
+  --color-google-border: var(--google-border);
+  --color-google-foreground: var(--google-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -95,6 +98,10 @@
   --paper: oklch(0.975 0.008 88);
   --paper-foreground: oklch(0.17 0.01 75);
   --paper-muted: oklch(0.45 0.02 80);
+  /* Google brand button (light theme per Google guidelines: #FFFFFF / #747775 / #1F1F1F) */
+  --google: oklch(1 0 0);
+  --google-border: oklch(0.56 0.004 150);
+  --google-foreground: oklch(0.24 0 0);
   --border: oklch(0.3 0.012 78);
   --input: oklch(0.32 0.012 78);
   --ring: oklch(0.79 0.12 80);
