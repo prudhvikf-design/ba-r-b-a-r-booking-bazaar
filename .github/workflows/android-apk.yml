@@ -30,6 +30,9 @@ jobs:
           - role: admin
             label: Admin
             artifact: BaRbaR-Admin-APK
+          - role: backend
+            label: Backend
+            artifact: BaRbaR-Backend-APK
     env:
       BARBAR_APP_ROLE: ${{ matrix.role }}
     steps:
