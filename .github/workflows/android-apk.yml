@@ -49,10 +49,14 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
 
+      - name: Use stable npm version
+        run: npm install --global npm@10.8.2
+
       - name: Install app and Capacitor dependencies
         run: |
-          npm install --no-package-lock
-          npm install --no-save --no-package-lock @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+          npm cache clean --force
+          npm install --no-package-lock --legacy-peer-deps --no-audit --no-fund
+          npm install --no-save --no-package-lock --legacy-peer-deps --no-audit --no-fund @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
 
       - name: Generate Android project
         run: npx cap add android
