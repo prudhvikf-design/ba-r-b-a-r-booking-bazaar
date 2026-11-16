@@ -10,33 +10,109 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SalonsIndexRouteImport } from './routes/salons.index'
+import { Route as SalonsSlugRouteImport } from './routes/salons.$slug'
+import { Route as AuthenticatedBookSlugRouteImport } from './routes/_authenticated/book.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalonsIndexRoute = SalonsIndexRouteImport.update({
+  id: '/salons/',
+  path: '/salons/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalonsSlugRoute = SalonsSlugRouteImport.update({
+  id: '/salons/$slug',
+  path: '/salons/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedBookSlugRoute = AuthenticatedBookSlugRouteImport.update({
+  id: '/book/$slug',
+  path: '/book/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/salons/$slug': typeof SalonsSlugRoute
+  '/salons/': typeof SalonsIndexRoute
+  '/book/$slug': typeof AuthenticatedBookSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/salons/$slug': typeof SalonsSlugRoute
+  '/salons': typeof SalonsIndexRoute
+  '/book/$slug': typeof AuthenticatedBookSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/salons/$slug': typeof SalonsSlugRoute
+  '/salons/': typeof SalonsIndexRoute
+  '/_authenticated/book/$slug': typeof AuthenticatedBookSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/salons/$slug'
+    | '/salons/'
+    | '/book/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/salons/$slug'
+    | '/salons'
+    | '/book/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/reset-password'
+    | '/salons/$slug'
+    | '/salons/'
+    | '/_authenticated/book/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SalonsSlugRoute: typeof SalonsSlugRoute
+  SalonsIndexRoute: typeof SalonsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +124,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salons/': {
+      id: '/salons/'
+      path: '/salons'
+      fullPath: '/salons/'
+      preLoaderRoute: typeof SalonsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salons/$slug': {
+      id: '/salons/$slug'
+      path: '/salons/$slug'
+      fullPath: '/salons/$slug'
+      preLoaderRoute: typeof SalonsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/book/$slug': {
+      id: '/_authenticated/book/$slug'
+      path: '/book/$slug'
+      fullPath: '/book/$slug'
+      preLoaderRoute: typeof AuthenticatedBookSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBookSlugRoute: typeof AuthenticatedBookSlugRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBookSlugRoute: AuthenticatedBookSlugRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SalonsSlugRoute: SalonsSlugRoute,
+  SalonsIndexRoute: SalonsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
