@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CalendarCheck, MapPin, Scissors, Search, Sparkles, Store, Droplets, Palette, Smile } from "lucide-react";
+import { ArrowRight, CalendarCheck, Scissors, Search, Sparkles, Store, Droplets, Palette, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SalonCard } from "@/components/salon-card";
