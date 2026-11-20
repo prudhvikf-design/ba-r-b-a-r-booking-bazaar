@@ -25,6 +25,15 @@ export function SalonStatusBadge({ status }: { status: SalonStatus }) {
   return <Badge variant={m.variant}>{m.label}</Badge>;
 }
 
+export function DemoNotice({ className = "" }: { className?: string }) {
+  return (
+    <p role="note" className={`rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm ${className}`}>
+      <strong className="font-semibold">Demo listing.</strong> This is sample data to preview BaRbaR — not a real business.
+      You can explore services, stylists and times, but bookings can't be placed here.
+    </p>
+  );
+}
+
 export function DemoBadge({ className = "" }: { className?: string }) {
   return (
     <Badge variant="muted" className={`uppercase tracking-wider ${className}`} title="Sample data for preview — not a real business">

@@ -30,7 +30,7 @@ export function SiteHeader() {
     if (hasRole("admin")) items.push({ to: "/admin", label: "Admin", icon: Shield });
   }
 
-  const name = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "";
+  const name = (user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email ?? "";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">

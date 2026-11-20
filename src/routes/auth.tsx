@@ -15,9 +15,9 @@ import heroImg from "@/assets/hero-barber.jpg";
 type Mode = "signin" | "signup" | "forgot";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>): { mode?: "signin" | "signup"; redirect?: string } => ({
-    mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  validateSearch: (s: Record<string, unknown>): { mode?: "signin" | "signup" | undefined; redirect?: string | undefined } => ({
+    mode: s["mode"] === "signup" ? "signup" : s["mode"] === "signin" ? "signin" : undefined,
+    redirect: typeof s["redirect"] === "string" ? s["redirect"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -162,20 +162,20 @@ function AuthPage() {
 
               <form onSubmit={onSubmit} noValidate className="mt-6 space-y-4">
                 {mode === "signup" && (
-                  <Field id="fullName" label="Full name" error={errors.fullName}>
+                  <Field id="fullName" label="Full name" error={errors["fullName"]}>
                     <Input id="fullName" autoComplete="name" value={form.fullName} onChange={set("fullName")} placeholder="Aarav Sharma" />
                   </Field>
                 )}
-                <Field id="email" label="Email" error={errors.email}>
+                <Field id="email" label="Email" error={errors["email"]}>
                   <Input id="email" type="email" autoComplete="email" value={form.email} onChange={set("email")} placeholder="you@example.com" />
                 </Field>
                 {mode === "signup" && (
-                  <Field id="phone" label="Mobile number (optional)" error={errors.phone}>
+                  <Field id="phone" label="Mobile number (optional)" error={errors["phone"]}>
                     <Input id="phone" type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} placeholder="+91 98765 43210" />
                   </Field>
                 )}
                 {mode !== "forgot" && (
-                  <Field id="password" label="Password" error={errors.password}>
+                  <Field id="password" label="Password" error={errors["password"]}>
                     <Input
                       id="password"
                       type="password"
@@ -219,7 +219,7 @@ function AuthPage() {
   );
 }
 
-function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
+function Field({ id, label, error, children }: { id: string; label: string; error?: string | undefined; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>

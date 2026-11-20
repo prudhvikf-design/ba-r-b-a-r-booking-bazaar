@@ -15,11 +15,11 @@ const SORTS = ["rating", "price", "name"] as const;
 
 export const Route = createFileRoute("/salons/")({
   validateSearch: (s: Record<string, unknown>): SalonSearch => ({
-    q: typeof s.q === "string" && s.q ? s.q.slice(0, 60) : undefined,
-    city: typeof s.city === "string" && s.city ? s.city.slice(0, 60) : undefined,
-    gender: GENDERS.includes(s.gender as SalonGender) ? (s.gender as SalonGender) : undefined,
-    category: typeof s.category === "string" && SERVICE_CATEGORIES.includes(s.category) ? s.category : undefined,
-    sort: SORTS.includes(s.sort as (typeof SORTS)[number]) ? (s.sort as SalonSearch["sort"]) : undefined,
+    q: typeof s["q"] === "string" && s["q"] ? s["q"].slice(0, 60) : undefined,
+    city: typeof s["city"] === "string" && s["city"] ? s["city"].slice(0, 60) : undefined,
+    gender: GENDERS.includes(s["gender"] as SalonGender) ? (s["gender"] as SalonGender) : undefined,
+    category: typeof s["category"] === "string" && SERVICE_CATEGORIES.includes(s["category"]) ? s["category"] : undefined,
+    sort: SORTS.includes(s["sort"] as (typeof SORTS)[number]) ? (s["sort"] as SalonSearch["sort"]) : undefined,
   }),
   head: () => ({
     meta: [

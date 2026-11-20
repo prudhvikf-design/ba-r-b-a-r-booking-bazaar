@@ -8,11 +8,11 @@ export type SalonListItem = Salon & {
 };
 
 export interface SalonSearch {
-  q?: string;
-  city?: string;
-  gender?: SalonGender;
-  category?: string;
-  sort?: "rating" | "price" | "name";
+  q?: string | undefined;
+  city?: string | undefined;
+  gender?: SalonGender | undefined;
+  category?: string | undefined;
+  sort?: "rating" | "price" | "name" | undefined;
 }
 
 export const salonSearchQuery = (s: SalonSearch) =>

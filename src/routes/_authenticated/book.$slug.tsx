@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DemoBadge } from "@/components/status-badge";
+import { DemoBadge, DemoNotice } from "@/components/status-badge";
 import { EmptyState, ErrorState } from "@/components/states";
 import { SlotPicker } from "@/components/booking/slot-picker";
 import { salonBySlugQuery } from "@/lib/queries";
@@ -16,8 +16,8 @@ import { formatDuration, formatINR, formatLongDate, formatTime, initials, istDat
 import { errorMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/book/$slug")({
-  validateSearch: (s: Record<string, unknown>): { serviceId?: string } => ({
-    serviceId: typeof s.serviceId === "string" ? s.serviceId : undefined,
+  validateSearch: (s: Record<string, unknown>): { serviceId?: string | undefined } => ({
+    serviceId: typeof s["serviceId"] === "string" ? s["serviceId"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -64,7 +64,7 @@ function BookPage() {
         _service_id: serviceId!,
         _staff_id: staffId as string,
         _start_at: slot!,
-        _notes: notes.trim() || undefined,
+        ...(notes.trim() ? { _notes: notes.trim() } : {}),
       });
       if (err) throw err;
       return data as string;
@@ -95,7 +95,7 @@ function BookPage() {
     );
   }
 
-  const canBook = !!service && !!slot && notes.length <= 500;
+  const canBook = !salon.is_demo && !!service && !!slot && notes.length <= 500;
 
   return (
     <div className="container-page py-6 pb-32 lg:pb-10">
@@ -106,9 +106,10 @@ function BookPage() {
         <h1 className="font-display text-3xl font-bold sm:text-4xl">Book at {salon.name}</h1>
         {salon.is_demo && <DemoBadge />}
       </div>
+      {salon.is_demo && <DemoNotice className="mt-4 max-w-2xl" />}
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-8">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-8">
           <Step n={1} title="Choose a service" done={!!service}>
             <div className="grid gap-2" role="radiogroup" aria-label="Services">
               {services.map((s) => (
@@ -188,7 +189,7 @@ function BookPage() {
               No payment needed now. The salon will confirm your request. Online payments are coming soon.
             </p>
             <Button variant="hero" size="xl" className="mt-5 hidden w-full lg:inline-flex" disabled={!canBook || book.isPending} onClick={() => book.mutate()}>
-              {book.isPending ? "Booking…" : "Confirm booking"}
+              {salon.is_demo ? "Demo — booking disabled" : book.isPending ? "Booking…" : "Confirm booking"}
             </Button>
           </div>
         </aside>
@@ -201,7 +202,7 @@ function BookPage() {
             <p className="truncate text-muted-foreground">{slot ? `${formatLongDate(slot)}, ${formatTime(slot)}` : "Pick a time"}</p>
           </div>
           <Button variant="hero" size="lg" disabled={!canBook || book.isPending} onClick={() => book.mutate()}>
-            {book.isPending ? "Booking…" : "Confirm"}
+            {salon.is_demo ? "Demo only" : book.isPending ? "Booking…" : "Confirm"}
           </Button>
         </div>
       </div>

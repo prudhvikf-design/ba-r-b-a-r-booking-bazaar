@@ -4,7 +4,7 @@ import { ArrowLeft, Clock, MapPin, Phone, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DemoBadge, SalonStatusBadge } from "@/components/status-badge";
+import { DemoBadge, DemoNotice, SalonStatusBadge } from "@/components/status-badge";
 import { EmptyState, ErrorState } from "@/components/states";
 import { salonBySlugQuery } from "@/lib/queries";
 import { formatClock, formatDuration, formatINR, initials, WEEKDAYS, istDateString, weekdayOfDateString } from "@/lib/format";
@@ -79,6 +79,7 @@ function SalonDetailPage() {
           <Badge variant="outline" className="capitalize">{salon.gender}</Badge>
         </div>
         <h1 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{salon.name}</h1>
+        {salon.is_demo && <DemoNotice className="mt-3 max-w-2xl" />}
         {salon.tagline && <p className="mt-1 text-lg text-muted-foreground">{salon.tagline}</p>}
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
           {salon.rating != null && (
@@ -98,7 +99,7 @@ function SalonDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-10">
             {salon.description && <p className="leading-relaxed text-muted-foreground">{salon.description}</p>}
 

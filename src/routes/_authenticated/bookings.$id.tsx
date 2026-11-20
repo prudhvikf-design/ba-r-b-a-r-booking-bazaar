@@ -12,8 +12,8 @@ import { formatDuration, formatINR, formatLongDate, formatTime } from "@/lib/for
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/bookings/$id")({
-  validateSearch: (s: Record<string, unknown>): { created?: boolean } => ({
-    created: s.created === true || s.created === "true" ? true : undefined,
+  validateSearch: (s: Record<string, unknown>): { created?: boolean | undefined } => ({
+    created: s["created"] === true || s["created"] === "true" ? true : undefined,
   }),
   head: () => ({
     meta: [
@@ -132,7 +132,7 @@ function BookingDetail() {
   );
 }
 
-function Info({ icon: Icon, label, value, sub }: { icon: typeof MapPin; label: string; value: string; sub?: string }) {
+function Info({ icon: Icon, label, value, sub }: { icon: typeof MapPin; label: string; value: string; sub?: string | undefined }) {
   return (
     <div className="flex gap-3">
       <Icon className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />

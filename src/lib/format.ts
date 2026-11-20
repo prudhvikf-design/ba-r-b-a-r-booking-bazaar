@@ -41,19 +41,24 @@ export function istDateString(d: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: IST_TZ }).format(d);
 }
 
+function parseYmd(date: string): [number, number, number] {
+  const [y = 1970, m = 1, d = 1] = date.split("-").map(Number);
+  return [y, m, d];
+}
+
 export function addDaysToDateString(date: string, days: number): string {
-  const [y, m, d] = date.split("-").map(Number);
+  const [y, m, d] = parseYmd(date);
   const dt = new Date(Date.UTC(y, m - 1, d + days));
   return dt.toISOString().slice(0, 10);
 }
 
 export function weekdayOfDateString(date: string): number {
-  const [y, m, d] = date.split("-").map(Number);
+  const [y, m, d] = parseYmd(date);
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 
 export function formatDateLabel(date: string): { day: string; num: string; month: string } {
-  const [y, m, d] = date.split("-").map(Number);
+  const [y, m, d] = parseYmd(date);
   const dt = new Date(Date.UTC(y, m - 1, d, 12));
   return {
     day: new Intl.DateTimeFormat("en-IN", { weekday: "short", timeZone: "UTC" }).format(dt),
@@ -95,7 +100,7 @@ export function formatLongDate(iso: string): string {
 
 /** "21:00:00" -> "9:00 pm" */
 export function formatClock(t: string): string {
-  const [h, m] = t.split(":").map(Number);
+  const [h = 0, m = 0] = t.split(":").map(Number);
   const suffix = h >= 12 ? "pm" : "am";
   const hh = h % 12 === 0 ? 12 : h % 12;
   return `${hh}:${String(m).padStart(2, "0")} ${suffix}`;

@@ -36,7 +36,7 @@ export function CancelBookingDialog({
   const [reason, setReason] = useState("");
   const m = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("cancel_booking", { _booking_id: bookingId, _reason: reason.trim() || undefined });
+      const { error } = await supabase.rpc("cancel_booking", { _booking_id: bookingId, ...(reason.trim() ? { _reason: reason.trim() } : {}) });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -110,7 +110,7 @@ export function RescheduleDialog({
       const { error } = await supabase.rpc("reschedule_booking", {
         _booking_id: bookingId,
         _start_at: slot!,
-        _staff_id: (chosenStaff ?? undefined) as string | undefined,
+        ...(chosenStaff ? { _staff_id: chosenStaff } : {}),
       });
       if (error) throw error;
     },

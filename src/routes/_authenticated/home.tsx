@@ -30,7 +30,9 @@ function HomePage() {
   const profile = useQuery({ ...myProfileQuery(uid), enabled: !!user });
   const bookings = useQuery({ ...myBookingsQuery(uid), enabled: !!user });
   const city = profile.data?.city ?? undefined;
-  const nearby = useQuery(city ? salonSearchQuery({ city }) : featuredSalonsQuery());
+  const byCity = useQuery({ ...salonSearchQuery({ city: city ?? "" }), enabled: !!city });
+  const featured = useQuery({ ...featuredSalonsQuery(), enabled: !city });
+  const nearby = city ? byCity : featured;
 
   const now = Date.now();
   const upcoming = (bookings.data ?? [])

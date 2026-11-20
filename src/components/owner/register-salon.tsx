@@ -38,10 +38,10 @@ export function RegisterSalonForm({ onCreated }: { onCreated?: () => void }) {
         _city: v.city,
         _area: v.area,
         _address_line: v.address_line,
-        _phone: v.phone || undefined,
         _gender: v.gender,
-        _description: v.description || undefined,
-        _pincode: v.pincode || undefined,
+        ...(v.phone ? { _phone: v.phone } : {}),
+        ...(v.description ? { _description: v.description } : {}),
+        ...(v.pincode ? { _pincode: v.pincode } : {}),
       });
       if (error) throw error;
     },
@@ -81,7 +81,7 @@ export function RegisterSalonForm({ onCreated }: { onCreated?: () => void }) {
         id: "city",
         label: "City",
         children: (
-          <Select value={form.city || undefined} onValueChange={(v) => setForm({ ...form, city: v })}>
+          <Select {...(form.city ? { value: form.city } : {})} onValueChange={(v) => setForm({ ...form, city: v })}>
             <SelectTrigger id="city"><SelectValue placeholder="Select city" /></SelectTrigger>
             <SelectContent>{CITIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>

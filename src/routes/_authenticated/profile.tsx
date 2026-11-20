@@ -78,7 +78,7 @@ function ProfilePage() {
 
   return (
     <div className="container-page max-w-xl py-8">
-      <PageHeader title="Your profile" description={user?.email ?? undefined} />
+      <PageHeader title="Your profile" description={user?.email ?? ""} />
       <div className="mb-6 flex flex-wrap gap-2">
         {roles.map((r) => <Badge key={r} variant="gold">{ROLE_LABEL[r]}</Badge>)}
       </div>
@@ -91,16 +91,16 @@ function ProfilePage() {
           <div className="space-y-1.5">
             <Label htmlFor="full_name">Full name</Label>
             <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} autoComplete="name" />
-            {errors.full_name && <p role="alert" className="text-sm text-destructive">{errors.full_name}</p>}
+            {errors["full_name"] && <p role="alert" className="text-sm text-destructive">{errors["full_name"]}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="phone">Mobile number</Label>
             <Input id="phone" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+91 98765 43210" autoComplete="tel" />
-            {errors.phone && <p role="alert" className="text-sm text-destructive">{errors.phone}</p>}
+            {errors["phone"] && <p role="alert" className="text-sm text-destructive">{errors["phone"]}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="city">City</Label>
-            <Select value={form.city || undefined} onValueChange={(v) => setForm({ ...form, city: v })}>
+            <Select {...(form.city ? { value: form.city } : {})} onValueChange={(v) => setForm({ ...form, city: v })}>
               <SelectTrigger id="city"><SelectValue placeholder="Select your city" /></SelectTrigger>
               <SelectContent>
                 {CITIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
