@@ -4,11 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarCheck, MapPin, Scissors, Search, Sparkles, Store, Droplets, Palette, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SalonCard } from "@/components/salon-card";
+import { IndiaLocationSearch } from "@/components/india-location-search";
 import { CardGridSkeleton, EmptyState, ErrorState } from "@/components/states";
 import { featuredSalonsQuery } from "@/lib/queries";
-import { CITIES } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import heroImg from "@/assets/hero-barber.jpg";
 
@@ -40,13 +39,14 @@ const POPULAR = [
 function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [city, setCity] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
   const [q, setQ] = useState("");
   const featured = useQuery(featuredSalonsQuery());
 
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
-    navigate({ to: "/salons", search: { city: city || undefined, q: q.trim() || undefined } });
+    const locationTerm = location.trim().split(",")[0];
+    navigate({ to: "/salons", search: { q: [locationTerm, q.trim()].filter(Boolean).join(" ") || undefined } });
   };
 
   return (
@@ -77,21 +77,11 @@ function Landing() {
 
           <form
             onSubmit={onSearch}
-            className="mt-8 grid max-w-3xl gap-2 rounded-2xl border border-border bg-card/90 p-2 shadow-card backdrop-blur sm:grid-cols-[180px_1fr_auto]"
+            className="mt-8 grid max-w-3xl gap-2 rounded-2xl border border-border bg-card/90 p-2 shadow-card backdrop-blur sm:grid-cols-[1fr_auto]"
             role="search"
             aria-label="Find a salon"
           >
-            <Select value={city} onValueChange={setCity}>
-              <SelectTrigger className="h-12 border-0 bg-muted" aria-label="City">
-                <MapPin className="size-4 text-primary" aria-hidden="true" />
-                <SelectValue placeholder="Any city" />
-              </SelectTrigger>
-              <SelectContent>
-                {CITIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <IndiaLocationSearch value={location} onChange={setLocation} />
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
