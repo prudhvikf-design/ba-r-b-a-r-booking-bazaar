@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { CalendarDays, LayoutDashboard, Scissors, Shield, Store, Users } from "lucide-react";
+import { CalendarDays, LayoutDashboard, Scissors, Shield, Store, Users, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AdminBookings, AdminOverview, AdminSalons, AdminServices, AdminUsers } from "@/components/admin/admin-panels";
+import { AdminBookings, AdminOverview, AdminSalons, AdminServices, AdminUsers, AdminStaff } from "@/components/admin/admin-panels";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   ssr: false,
@@ -36,12 +36,14 @@ function AdminPage() {
           <TabsTrigger value="users"><Users className="size-4" /> Customers</TabsTrigger>
           <TabsTrigger value="salons"><Store className="size-4" /> Salons</TabsTrigger>
           <TabsTrigger value="services"><Scissors className="size-4" /> Services</TabsTrigger>
+          <TabsTrigger value="staff"><UserRound className="size-4" /> Barbers</TabsTrigger>
           <TabsTrigger value="bookings"><CalendarDays className="size-4" /> Bookings</TabsTrigger>
         </TabsList>
         <TabsContent value="overview"><AdminOverview /></TabsContent>
         <TabsContent value="users"><AdminUsers /></TabsContent>
         <TabsContent value="salons"><AdminSalons /></TabsContent>
         <TabsContent value="services"><AdminServices /></TabsContent>
+        <TabsContent value="staff"><AdminStaff /></TabsContent>
         <TabsContent value="bookings"><AdminBookings /></TabsContent>
       </Tabs>
     </div>
