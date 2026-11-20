@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, IndianRupee, Scissors, Store, Users, Clock } from "lucide-react";
+import { CalendarDays, IndianRupee, Scissors, Store, Users, Clock, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -234,6 +234,67 @@ export function AdminServices() {
                 <p className="text-sm text-muted-foreground">{s.category} · {formatINR(s.price_paise)} · {formatDuration(s.duration_min)}</p>
               </div>
               <Switch checked={s.is_active} onCheckedChange={(v) => m.mutate({ id: s.id, is_active: v })} aria-label={`${s.is_active ? "Hide" : "Show"} ${s.name}`} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+
+export function AdminStaff() {
+  const qc = useQueryClient();
+  const [filter, setFilter] = useState("");
+  const q = useQuery({
+    queryKey: ["admin", "staff"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("staff")
+        .select("id, name, title, years_experience, is_active, salon_id, salons(name, city, area)")
+        .order("name")
+        .limit(1000);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const m = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase.from("staff").update({ is_active }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Barber status updated");
+      qc.invalidateQueries({ queryKey: ["admin", "staff"] });
+      qc.invalidateQueries({ queryKey: ["salon"] });
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  if (q.isLoading) return <ListSkeleton />;
+  if (q.isError) return <ErrorState error={q.error} onRetry={() => q.refetch()} />;
+  const f = filter.trim().toLowerCase();
+  const rows = (q.data ?? []).filter((s) =>
+    !f || `${s.name} ${s.title ?? ""} ${s.salons?.name ?? ""} ${s.salons?.city ?? ""} ${s.salons?.area ?? ""}`.toLowerCase().includes(f)
+  );
+  return (
+    <div>
+      <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search barber, salon or city" className="mb-4 max-w-sm" aria-label="Search barbers" />
+      {rows.length === 0 ? <EmptyState title="No barbers found" /> : (
+        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          {rows.map((s) => (
+            <li key={s.id} className="flex flex-wrap items-center gap-3 p-4">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{s.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {s.title || "Barber"} · {s.salons?.name || "Unknown salon"}
+                  {s.salons?.area || s.salons?.city ? ` · ${[s.salons?.area, s.salons?.city].filter(Boolean).join(", ")}` : ""}
+                </p>
+                {s.years_experience !== null && <p className="text-xs text-muted-foreground">{s.years_experience} years experience</p>}
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={s.is_active ? "success" : "muted"}>{s.is_active ? "Active" : "Hidden"}</Badge>
+                <Switch checked={s.is_active} disabled={m.isPending} onCheckedChange={(v) => m.mutate({ id: s.id, is_active: v })} aria-label={`${s.is_active ? "Hide" : "Activate"} ${s.name}`} />
+              </div>
             </li>
           ))}
         </ul>
