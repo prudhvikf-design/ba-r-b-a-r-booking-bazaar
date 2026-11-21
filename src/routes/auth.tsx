@@ -329,6 +329,7 @@ function AuthPage() {
                   </Button>
                 )}
               </form>
+              )}
 
               {mode !== "forgot" && (
                 <>
