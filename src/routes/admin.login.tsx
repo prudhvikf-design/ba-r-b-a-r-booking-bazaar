@@ -38,6 +38,30 @@ function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  // Private password setup: the owner receives a one-time link by email and chooses
+  // a new password themselves. No password is ever stored in code or chat.
+  const sendSetupLink = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      toast.error("Enter your admin email first.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      // Same message whether or not the account exists, so emails cannot be probed.
+      setResetSent(true);
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -120,6 +144,24 @@ function AdminLoginPage() {
             {busy ? "Verifying access…" : "Sign in as admin"}
           </Button>
         </form>
+
+        <div className="mt-4 text-center text-sm">
+          {resetSent ? (
+            <p role="status" className="text-muted-foreground">
+              If this email belongs to an account, a private link to set a new password is on its
+              way. Open it on this device.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void sendSetupLink()}
+              disabled={busy}
+              className="font-medium text-primary hover:underline disabled:opacity-50"
+            >
+              First time, or forgot your password? Email me a setup link
+            </button>
+          )}
+        </div>
 
         <div className="mt-6 border-t border-border pt-5 text-center text-sm text-muted-foreground">
           Not an administrator?{" "}

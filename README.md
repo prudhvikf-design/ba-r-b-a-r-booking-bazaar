@@ -51,5 +51,7 @@ npm run dev
    select id, 'admin' from auth.users where email = lower('person@example.com')
    on conflict do nothing;
    ```
-3. They sign in at `/admin/login`.
+3. The admin sets their own password privately: on `/admin/login`, enter the email and choose "Email me a setup link". The one-time link opens `/reset-password`; after saving, other sessions are signed out, the server re-checks the admin role and opens `/admin`.
 4. Further admins are added by an existing admin in Admin → Customers. Admins cannot remove their own admin role.
+
+Never share or store admin passwords in code, chat or documents.

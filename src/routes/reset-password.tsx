@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { errorMessage } from "@/lib/errors";
+import { verifyAdminAccess } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
@@ -14,6 +15,9 @@ export const Route = createFileRoute("/reset-password")({
       { name: "description", content: "Choose a new password for your BaRbaR account." },
       { property: "og:title", content: "Set a new password — BaRbaR" },
       { property: "og:description", content: "Choose a new password for your BaRbaR account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
     ],
   }),
   component: ResetPassword,
@@ -43,15 +47,27 @@ function ResetPassword() {
     if (pw !== pw2) return setError("Passwords don't match");
     setBusy(true);
     const { error: err } = await supabase.auth.updateUser({ password: pw });
+    if (err) {
+      setBusy(false);
+      return toast.error(errorMessage(err));
+    }
+    // A new password should end any other signed-in sessions (e.g. an old leaked password).
+    await supabase.auth.signOut({ scope: "others" }).catch(() => undefined);
+    // Admins go straight to the dashboard, but only after the server confirms the role.
+    const { isAdmin } = await verifyAdminAccess().catch(() => ({ isAdmin: false }));
     setBusy(false);
-    if (err) return toast.error(errorMessage(err));
-    toast.success("Password updated");
-    navigate({ to: "/home" });
+    setPw("");
+    setPw2("");
+    toast.success(isAdmin ? "Password updated. Admin access verified." : "Password updated");
+    navigate({ to: isAdmin ? "/admin" : "/home", replace: true });
   };
 
   return (
     <div className="container-page flex justify-center py-16">
-      <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-xl border border-border bg-card p-6">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-md space-y-4 rounded-xl border border-border bg-card p-6"
+      >
         <h1 className="font-display text-3xl font-bold">Set a new password</h1>
         {!ready ? (
           <p className="text-muted-foreground">Open this page from the reset link in your email.</p>
@@ -59,13 +75,29 @@ function ResetPassword() {
           <>
             <div className="space-y-1.5">
               <Label htmlFor="pw">New password</Label>
-              <Input id="pw" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} />
+              <Input
+                id="pw"
+                type="password"
+                autoComplete="new-password"
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pw2">Confirm password</Label>
-              <Input id="pw2" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} />
+              <Input
+                id="pw2"
+                type="password"
+                autoComplete="new-password"
+                value={pw2}
+                onChange={(e) => setPw2(e.target.value)}
+              />
             </div>
-            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
+            )}
             <Button type="submit" variant="hero" className="w-full" disabled={busy}>
               {busy ? "Saving…" : "Update password"}
             </Button>
