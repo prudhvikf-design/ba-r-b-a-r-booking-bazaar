@@ -99,7 +99,7 @@ export function AdminUsers() {
                 <p className="truncate text-sm text-muted-foreground">{u.email}{u.phone ? ` · ${u.phone}` : ""}{u.city ? ` · ${u.city}` : ""}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-1">
                   {u.roles.map((r) => <Badge key={r} variant={r === "admin" ? "gold" : "muted"}>{ROLE_LABEL[r]}</Badge>)}
-                  <span className="text-xs text-muted-foreground">{u.booking_count} bookings</span>
+                  <span className="text-xs text-muted-foreground">{u.booking_count} bookings · Joined {u.created_at ? new Date(u.created_at).toLocaleDateString("en-IN") : "—"}</span>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
