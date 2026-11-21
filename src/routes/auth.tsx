@@ -49,6 +49,10 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [phoneOtp, setPhoneOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpBusy, setOtpBusy] = useState(false);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "" });
   const target = safeRedirect(search.redirect) ?? "/home";
 
@@ -61,6 +65,78 @@ function AuthPage() {
   }, [user, loading, navigate, target]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const normalizedPhone = (value: string) => {
+    const digits = value.replace(/\\D/g, "");
+    return digits.length === 10 ? `+91${digits}` : digits.length === 12 && digits.startsWith("91") ? `+${digits}` : value.trim();
+  };
+
+  const sendPhoneOtp = async () => {
+    const phone = normalizedPhone(form.phone);
+    if (!/^\\+91[6-9]\\d{9}$/.test(phone)) {
+      setErrors({ phone: "Enter a valid 10-digit Indian mobile number" });
+      return;
+    }
+    if (mode === "signup" && form.fullName.trim().length < 2) {
+      setErrors({ fullName: "Enter your full name before requesting OTP" });
+      return;
+    }
+    setOtpBusy(true);
+    setErrors({});
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone,
+        options: {
+          shouldCreateUser: mode === "signup",
+          data: mode === "signup" ? { full_name: form.fullName.trim(), phone } : undefined,
+        },
+      });
+      if (error) throw error;
+      setForm((current) => ({ ...current, phone }));
+      setOtpSent(true);
+      toast.success("OTP sent. Check your SMS messages.");
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
+  const verifyPhoneOtp = async () => {
+    const phone = normalizedPhone(form.phone);
+    if (!/^\\+91[6-9]\\d{9}$/.test(phone) || !/^\\d{6}$/.test(otpCode.trim())) {
+      setErrors({ otp: "Enter the 6-digit OTP sent to your mobile" });
+      return;
+    }
+    setOtpBusy(true);
+    setErrors({});
+    try {
+      const { error } = await supabase.auth.verifyOtp({ phone, token: otpCode.trim(), type: "sms" });
+      if (error) throw error;
+      if (mode === "signup") {
+        const { data: current } = await supabase.auth.getUser();
+        if (current.user) {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: current.user.id,
+            full_name: form.fullName.trim(),
+            phone,
+          });
+          if (profileError) throw profileError;
+          if (form.email.trim()) {
+            const { error: emailError } = await supabase.auth.updateUser({ email: form.email.trim() });
+            if (emailError) toast.error("Phone verified. Email update needs attention: " + errorMessage(emailError));
+            else toast.success("Phone verified. Confirm the email verification message to add your email.");
+          }
+        }
+      }
+      toast.success("Mobile number verified. Welcome to BaRbaR!");
+      navigate({ to: target, replace: true });
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setOtpBusy(false);
+    }
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -166,7 +242,55 @@ function AuthPage() {
                 </div>
               )}
 
-              <form onSubmit={onSubmit} noValidate className="mt-6 space-y-4">
+              {mode !== "forgot" && (
+                <div className="mt-5 rounded-xl border border-border bg-card p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">Continue with mobile OTP</p>
+                      <p className="text-xs text-muted-foreground">Sign in securely using your Indian mobile number</p>
+                    </div>
+                    <Button type="button" variant={phoneOtp ? "outline" : "hero"} size="sm" onClick={() => { setPhoneOtp((v) => !v); setOtpSent(false); setOtpCode(""); setErrors({}); }}>
+                      {phoneOtp ? "Use email instead" : "Use OTP"}
+                    </Button>
+                  </div>
+                  {phoneOtp && (
+                    <div className="mt-4 space-y-3">
+                      {mode === "signup" && (
+                        <>
+                          <Field id="otpFullName" label="Full name" error={errors["fullName"]}>
+                            <Input id="otpFullName" value={form.fullName} onChange={set("fullName")} placeholder="Your full name" />
+                          </Field>
+                          <Field id="otpEmail" label="Email address (optional)" error={errors["email"]}>
+                            <Input id="otpEmail" type="email" value={form.email} onChange={set("email")} placeholder="you@example.com" />
+                          </Field>
+                        </>
+                      )}
+                      <Field id="otpPhone" label="Indian mobile number" error={errors["phone"]}>
+                        <Input id="otpPhone" type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(e) => { set("phone")(e); setOtpSent(false); }} placeholder="+91 98765 43210" />
+                      </Field>
+                      {!otpSent ? (
+                        <Button type="button" variant="hero" className="w-full" disabled={otpBusy} onClick={() => void sendPhoneOtp()}>
+                          {otpBusy ? "Sending OTP…" : "Send OTP"}
+                        </Button>
+                      ) : (
+                        <>
+                          <Field id="otpCode" label="6-digit OTP" error={errors["otp"]}>
+                            <Input id="otpCode" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\\D/g, "").slice(0, 6))} placeholder="Enter OTP" />
+                          </Field>
+                          <Button type="button" variant="hero" className="w-full" disabled={otpBusy} onClick={() => void verifyPhoneOtp()}>
+                            {otpBusy ? "Verifying…" : "Verify OTP and continue"}
+                          </Button>
+                          <Button type="button" variant="ghost" className="w-full" disabled={otpBusy} onClick={() => { setOtpSent(false); setOtpCode(""); }}>
+                            Change number / resend OTP
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {!phoneOtp && true && (
+                <form onSubmit={onSubmit} noValidate className="mt-6 space-y-4">
                 {mode === "signup" && (
                   <Field id="fullName" label="Full name" error={errors["fullName"]}>
                     <Input id="fullName" autoComplete="name" value={form.fullName} onChange={set("fullName")} placeholder="Aarav Sharma" />
