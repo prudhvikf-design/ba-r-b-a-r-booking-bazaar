@@ -17,6 +17,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as SalonsIndexRouteImport } from './routes/salons.index'
 import { Route as SalonsSlugRouteImport } from './routes/salons.$slug'
 import { Route as AuthenticatedBookSlugRouteImport } from './routes/_authenticated/book.$slug'
@@ -62,6 +63,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalonsIndexRoute = SalonsIndexRouteImport.update({
   id: '/salons/',
   path: '/salons/',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/owner': typeof AuthenticatedOwnerRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/admin/login': typeof AdminLoginRoute
   '/salons/$slug': typeof SalonsSlugRoute
   '/salons/': typeof SalonsIndexRoute
   '/book/$slug': typeof AuthenticatedBookSlugRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedHomeRoute
   '/owner': typeof AuthenticatedOwnerRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/admin/login': typeof AdminLoginRoute
   '/salons/$slug': typeof SalonsSlugRoute
   '/salons': typeof SalonsIndexRoute
   '/book/$slug': typeof AuthenticatedBookSlugRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/admin/login': typeof AdminLoginRoute
   '/salons/$slug': typeof SalonsSlugRoute
   '/salons/': typeof SalonsIndexRoute
   '/_authenticated/book/$slug': typeof AuthenticatedBookSlugRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/owner'
     | '/profile'
+    | '/admin/login'
     | '/salons/$slug'
     | '/salons/'
     | '/book/$slug'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/owner'
     | '/profile'
+    | '/admin/login'
     | '/salons/$slug'
     | '/salons'
     | '/book/$slug'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/owner'
     | '/_authenticated/profile'
+    | '/admin/login'
     | '/salons/$slug'
     | '/salons/'
     | '/_authenticated/book/$slug'
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   SalonsSlugRoute: typeof SalonsSlugRoute
   SalonsIndexRoute: typeof SalonsIndexRoute
 }
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/salons/': {
       id: '/salons/'
@@ -312,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  AdminLoginRoute: AdminLoginRoute,
   SalonsSlugRoute: SalonsSlugRoute,
   SalonsIndexRoute: SalonsIndexRoute,
 }

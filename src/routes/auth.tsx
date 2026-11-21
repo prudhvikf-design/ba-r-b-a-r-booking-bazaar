@@ -143,6 +143,12 @@ function AuthPage() {
                     ? "Enter your email and we'll send you a reset link."
                     : "Sign in to book and manage your appointments."}
               </p>
+              {target.startsWith("/admin") && (
+                <p className="mt-3 rounded-md border border-primary/40 bg-accent px-3 py-2 text-sm text-accent-foreground">
+                  Administrator?{" "}
+                  <Link to="/admin/login" className="font-semibold text-primary hover:underline">Use the admin sign in</Link>
+                </p>
+              )}
 
               {mode !== "forgot" && (
                 <div role="tablist" aria-label="Account" className="mt-6 grid grid-cols-2 rounded-lg border border-border bg-muted p-1">

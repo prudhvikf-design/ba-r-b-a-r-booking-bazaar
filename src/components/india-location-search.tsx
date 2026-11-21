@@ -12,16 +12,20 @@ function collectOptions(value: unknown, out: LocationOption[], seen: Set<string>
   }
   if (!value || typeof value !== "object") return;
   const obj = value as Record<string, unknown>;
-  const name = [obj.name, obj.cityName, obj.districtName, obj.stateName, obj.label, obj.title]
-    .find((v) => typeof v === "string" && v.trim()) as string | undefined;
+  const pick = (...keys: string[]) =>
+    keys.map((k) => obj[k]).find((v): v is string => typeof v === "string" && v.trim() !== "");
+  const name = pick("name", "cityName", "districtName", "stateName", "label", "title");
   if (name) {
-    const type = String(obj.type ?? obj.level ?? obj.category ?? obj.entityType ?? "Location");
-    const state = [obj.stateName, obj.state].find((v) => typeof v === "string") as string | undefined;
-    const district = [obj.districtName, obj.district].find((v) => typeof v === "string") as string | undefined;
+    const rawType = ["type", "level", "category", "entityType"]
+      .map((k) => obj[k])
+      .find((v) => v != null);
+    const type = String(rawType ?? "Location");
+    const state = pick("stateName", "state");
+    const district = pick("districtName", "district");
     const key = [name, type, state, district].join("|").toLowerCase();
     if (!seen.has(key)) {
       seen.add(key);
-      out.push({ name, type, state, district });
+      out.push({ name, type, ...(state ? { state } : {}), ...(district ? { district } : {}) });
     }
   }
   Object.values(obj).forEach((v) => {
@@ -109,7 +113,10 @@ export function IndiaLocationSearch({
   };
 
   const choose = (option: LocationOption) => {
-    const label = [option.name, option.district, option.state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", ");
+    const label = [option.name, option.district, option.state]
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", ");
     setQuery(label);
     onChange(label);
     setOptions([]);
@@ -118,10 +125,16 @@ export function IndiaLocationSearch({
   return (
     <div className="relative min-w-0">
       <div className="relative">
-        <MapPin className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary" aria-hidden="true" />
+        <MapPin
+          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary"
+          aria-hidden="true"
+        />
         <Input
           value={query}
-          onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); }}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            onChange(e.target.value);
+          }}
           placeholder="Search state, district, city or area"
           className="h-12 border-0 bg-muted pl-9 pr-12"
           aria-label="Search Indian state, district, city or area"
@@ -136,30 +149,59 @@ export function IndiaLocationSearch({
           title="Use my current location"
           className="absolute right-3 top-1/2 -translate-y-1/2 text-primary disabled:opacity-50"
         >
-          {locating ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
+          {locating ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <LocateFixed className="size-4" />
+          )}
         </button>
       </div>
       {options.length > 0 && (
-        <ul className="absolute z-50 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-border bg-card p-1 shadow-xl" role="listbox" aria-label="Location suggestions">
+        <ul
+          className="absolute z-50 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-border bg-card p-1 shadow-xl"
+          role="listbox"
+          aria-label="Location suggestions"
+        >
           {options.map((option, i) => (
             <li key={`${option.name}-${option.type}-${i}`}>
-              <button type="button" role="option" aria-selected={false} onClick={() => choose(option)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-muted">
+              <button
+                type="button"
+                role="option"
+                aria-selected={false}
+                onClick={() => choose(option)}
+                className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-muted"
+              >
                 <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium">{option.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">{[option.type, option.district, option.state].filter(Boolean).join(" · ")}</span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {[option.type, option.district, option.state].filter(Boolean).join(" · ")}
+                  </span>
                 </span>
               </button>
             </li>
           ))}
         </ul>
       )}
-      {error && <p className="mt-1 text-xs text-destructive" role="status">{error}</p>}
+      {error && (
+        <p className="mt-1 text-xs text-destructive" role="status">
+          {error}
+        </p>
+      )}
       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
-        <a href={mapsSearchUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+        <a
+          href={mapsSearchUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-primary hover:underline"
+        >
           <Map className="size-3.5" /> Find nearby salons on Google Maps
         </a>
-        {loading && <span className="inline-flex items-center gap-1 text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Searching India locations…</span>}
+        {loading && (
+          <span className="inline-flex items-center gap-1 text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" /> Searching India locations…
+          </span>
+        )}
       </div>
     </div>
   );

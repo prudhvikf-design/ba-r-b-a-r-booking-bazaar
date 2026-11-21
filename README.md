@@ -35,3 +35,21 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Administrator access
+
+- Admins sign in at `/admin/login` with email and password. After sign-in the server validates the session and checks the `admin` role in the database; non-admin accounts are signed out and refused.
+- `/admin` re-checks the role on the server before loading, and every admin action is enforced again by the database.
+- Nobody can give themselves a role: new accounts only get `customer`, the roles table accepts no direct writes from the app, and roles change only through the admin-checked `admin_set_role` function.
+
+### Provisioning the first admin (one-time, no hardcoded credentials)
+
+1. The person who will be admin registers a normal account at `/auth` and confirms their email.
+2. The project owner grants the role once, from Lovable Cloud (ask the Lovable agent in chat, or run in the backend's SQL runner), replacing the email:
+   ```sql
+   insert into public.user_roles (user_id, role)
+   select id, 'admin' from auth.users where email = lower('person@example.com')
+   on conflict do nothing;
+   ```
+3. They sign in at `/admin/login`.
+4. Further admins are added by an existing admin in Admin → Customers. Admins cannot remove their own admin role.

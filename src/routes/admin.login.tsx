@@ -7,22 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { errorMessage } from "@/lib/errors";
+import { verifyAdminAccess } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/login")({
   ssr: false,
   beforeLoad: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
-    const { data, error } = await supabase.rpc("has_role", {
-      _user_id: user.id,
-      _role: "admin",
-    });
-    if (!error && data) throw redirect({ to: "/admin" });
+    const result = await verifyAdminAccess().catch(() => ({ isAdmin: false }));
+    if (result.isAdmin) throw redirect({ to: "/admin" });
   },
   head: () => ({
     meta: [
       { title: "Admin sign in — BaRbaR" },
       { name: "description", content: "Secure administrator sign in for BaRbaR Booking Bazaar." },
+      { property: "og:title", content: "Admin sign in — BaRbaR" },
+      { property: "og:description", content: "Restricted sign in for BaRbaR administrators." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -52,12 +56,8 @@ function AdminLoginPage() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Sign in could not be completed.");
 
-      // Verify the role against the database; never trust a client-side role value.
-      const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
-        _user_id: authData.user.id,
-        _role: "admin",
-      });
-      if (roleError) throw roleError;
+      // Verify the role on the server against the database; never trust a client-side role value.
+      const { isAdmin } = await verifyAdminAccess();
       if (!isAdmin) {
         await supabase.auth.signOut();
         throw new Error("This account does not have administrator access.");
@@ -79,10 +79,13 @@ function AdminLoginPage() {
         <div className="mb-6 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <ShieldCheck className="size-6" aria-hidden="true" />
         </div>
-        <p className="text-sm font-medium uppercase tracking-wider text-primary">BaRbaR · Restricted area</p>
+        <p className="text-sm font-medium uppercase tracking-wider text-primary">
+          BaRbaR · Restricted area
+        </p>
         <h1 className="mt-2 font-display text-3xl font-bold">Admin sign in</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in with an existing administrator account. Customer and salon-owner accounts cannot access this dashboard.
+          Sign in with an existing administrator account. Customer and salon-owner accounts cannot
+          access this dashboard.
         </p>
 
         <form onSubmit={onSubmit} className="mt-7 space-y-4">
@@ -119,7 +122,10 @@ function AdminLoginPage() {
         </form>
 
         <div className="mt-6 border-t border-border pt-5 text-center text-sm text-muted-foreground">
-          Not an administrator? <Link to="/auth" className="font-medium text-primary hover:underline">Customer sign in</Link>
+          Not an administrator?{" "}
+          <Link to="/auth" className="font-medium text-primary hover:underline">
+            Customer sign in
+          </Link>
         </div>
       </section>
     </main>

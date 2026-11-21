@@ -8,4 +8,5 @@
 - [x] Launch-readiness QA pass: run test/lint/build; review booking flow, auth redirects, history, owner dashboard, salon approval, role/RLS (admin-only role grants, owner protected fields & cross-owner, customer-only cancel/reschedule, public sees active salons only)
 - [x] Block bookings at demo salons (DB + UI), keep demo labels clear
 - [x] Record architecture rules in AGENTS.md
-- [ ] Owner action: make the first admin account (needs manual role grant)
+- [x] Owner action: make the first admin account (granted)
+- [x] Secure admin sign-in at /admin/login with server-side role check; roles table locked to direct writes

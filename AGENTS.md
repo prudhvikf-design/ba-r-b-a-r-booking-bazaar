@@ -35,5 +35,6 @@ use the editor.
 - `_resolve_booking_slot` is the single validator for new/rescheduled times and refuses salons that are not active or are flagged `is_demo`. Why: demo listings must never take real bookings; `get_available_slots` may still show preview times.
 - Protected salon fields (status, owner, slug, rating, review count, demo flag) are guarded by the `salons_guard` trigger; only admins may change them. Why: owners must not self-approve or alter trust signals.
 - Roles live only in `user_roles`, changed only via `admin_set_role` (admin-checked). Why: prevent privilege escalation.
+- Admin UI access is verified by the `verifyAdminAccess` server function (bearer-validated, DB role check) on `/admin/login` and `/admin`; the first admin is granted once by the owner with a direct database insert, never via app code. Why: no client-trusted roles and no public self-assignment path.
 - Money is stored as integer paise and times are interpreted in Asia/Kolkata. Why: avoid float rounding and timezone drift.
 - Code must satisfy the strict tsconfig (`exactOptionalPropertyTypes`, bracket access on index signatures); omit optional RPC args with conditional spreads instead of passing `undefined`.
